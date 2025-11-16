@@ -13,18 +13,9 @@
             font-family: 'Inter', sans-serif;
         }
 
-        /* SVG Map Styling */
-        .farm-svg {
-            width: 100%;
-            height: auto;
-            max-height: 70vh;
-        }
-        .farm-bg { fill: #f0fdf4; } /* Light green grass */
-        .farm-shed { fill: #78350f; } /* Brown shed */
-        .farm-plot { fill: #a3e635; stroke: #65a30d; stroke-width: 2px; } /* Bright green plots */
-        .farm-orchard-tree { fill: #22c55e; } /* Green trees */
-        .farm-fence { fill: none; stroke: #737373; stroke-width: 2px; }
-        .farm-tennis { fill: #dbeafe; } /* Blue tennis courts */
+        /* SVG styles removed as they are no longer needed.
+          Hotspot and Modal styles are unchanged.
+        */
 
         /* Hotspot Styling */
         .hotspot {
@@ -105,7 +96,7 @@
                       after you upload it to your WordPress media library.
                     -->
                     <img src="microfarm-map-with-labels.png" alt="Directions to UT Microfarm" class="w-full h-auto"
-                         onerror="this.src='https_placehold.co/800x600/e2e8f0/94a3b8?text=Directions+Map+Loading...'">
+                         onerror="this.src='https://placehold.co/800x600/e2e8f0/94a3b8?text=Directions+Map+Loading...'">
                 </div>
             </div>
 
@@ -116,55 +107,32 @@
                 
                 <!-- 
                   This is the core of the interactive map.
-                  The SVG is drawn below, and the hotspots (divs) are
-                  positioned absolutely on top of it.
+                  The SVG has been REPLACED with an <img> tag.
+                  The hotspots (divs) are positioned on top of it.
                 -->
                 <div class="relative w-full max-w-3xl mx-auto aspect-video rounded-lg overflow-hidden border border-gray-200">
                     <!-- 
-                      This is the inline, illustrated SVG map.
-                      It's drawn to look like your 'ut microfarm only.jpg' file.
+                      *** THIS IS THE IMPORTANT PART ***
+                      Replace this 'src' with the URL of the beautiful map
+                      you create in Photoshop and upload to WordPress.
                     -->
-                    <svg class="farm-svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
-                        <!-- Background -->
-                        <rect class="farm-bg" width="800" height="450" />
-                        
-                        <!-- Tennis Courts (for reference) -->
-                        <rect class="farm-tennis" x="0" y="0" width="800" height="50" />
-                        <rect class="farm-tennis" x="0" y="380" width="100" height="70" />
-                        
-                        <!-- Farm Fence -->
-                        <path class="farm-fence" d="M 120 420 L 120 180 Q 120 80, 220 80 L 780 80 L 780 420 Z" />
-                        
-                        <!-- Main Shed -->
-                        <path class="farm-shed" d="M 250 200 L 300 170 L 350 200 L 350 260 L 250 260 Z" />
-                        
-                        <!-- Large Plots -->
-                        <rect class="farm-plot" x="400" y="100" width="350" height="100" />
-                        <rect class="farm-plot" x="400" y="220" width="350" height="100" />
-                        
-                        <!-- Raised Beds -->
-                        <rect class="farm-plot" x="150" y="200" width="50" height="30" />
-                        <rect class="farm-plot" x="150" y="240" width="50" height="30" />
-                        <rect class="farm-plot" x="150" y="280" width="50" height="30" />
-                        <rect class="farm-plot" x="150" y="320" width="50" height="30" />
-                        
-                        <rect class="farm-plot" x="220" y="280" width="50" height="30" />
-                        <rect class="farm-plot" x="220" y="320" width="50" height="30" />
-
-                        <!-- Orchard -->
-                        <circle class="farm-orchard-tree" cx="300" cy="350" r="8" />
-                        <circle class="farm-orchard-tree" cx="330" cy="370" r="8" />
-                        <circle class="farm-orchard-tree" cx="360" cy="350" r="8" />
-                        <circle class="farm-orchard-tree" cx="390" cy="370" r="8" />
-                        <circle class="farm-orchard-tree" cx="420" cy="350" r="8" />
-                    </svg>
+                    <img src="ut-microfarm-only.png" 
+                         alt="Illustrated map of the UT Microfarm" 
+                         class="w-full h-full object-cover">
                     
                     <!-- 
                       Hotspots
-                      These are positioned with percentages (top, left)
-                      to stay in place on the responsive SVG.
+                      These are positioned with percentages (top, left).
+                      You will need to drag these around to match your custom map.
+                      
+                      To find the percentages:
+                      1. Open this file in a browser.
+                      2. Right-click a hotspot and "Inspect Element".
+                      3. Manually edit the "top: Y%" and "left: X%" values
+                         until the dot is where you want it.
+                      4. Copy those final values back into this file.
                     -->
-                    <div class="hotspot" style="top: 45%; left: 37%;" onclick="openModal('shed')"></div>
+                    <div class="hotspot" style="top: 35%; left: 38%;" onclick="openModal('shed')"></div>
                     <div class="hotspot" style="top: 65%; left: 25%;" onclick="openModal('beds')"></div>
                     <div class="hotspot" style="top: 30%; left: 70%;" onclick="openModal('plot1')"></div>
                     <div class="hotspot" style="top: 80%; left: 50%;" onclick="openModal('orchard')"></div>
@@ -177,6 +145,7 @@
     <!-- 
       Modal Window
       This is hidden by default and shown with JavaScript.
+      (This section is unchanged)
     -->
     <div id="modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeModal()">
         <!-- Modal Backdrop -->
@@ -200,6 +169,7 @@
 
     <!-- 
       JavaScript for Tabs and Modal
+      (This section is unchanged)
     -->
     <script>
         // Data for the modal popups
@@ -207,7 +177,7 @@
             'shed': {
                 title: 'Main Shed & Tool Storage',
                 description: 'This is where we keep all our tools, seeds, and equipment. It\'s also the main gathering point for new volunteers before a workday begins. Fun fact: The roof is designed to collect rainwater!',
-                imageUrl: 'https://placehold.co/600x400/a3e635/4d7c0f?text=Ground+Photo+of+Shed'
+                imageUrl: 'garden_shed_example.jpg'
             },
             'beds': {
                 title: 'Raised Garden Beds',
@@ -245,11 +215,13 @@
         function switchTab(tab) {
             // Update button styles
             for (const key in tabButtons) {
-                tabButtons[key].classList.remove('text-green-700', 'border-green-700');
+                // Remove active styles from all buttons (color + border)
+                tabButtons[key].classList.remove('text-green-700', 'border-green-700', 'border-b-4');
                 tabButtons[key].classList.add('text-gray-500', 'hover:text-green-600');
             }
-            tabButtons[tab].classList.add('text-green-700', 'border-green-700');
-            tabButtons[tab].classList.remove('text-gray-500');
+            // Add active styles to the selected button (color + border thickness + border color)
+            tabButtons[tab].classList.add('text-green-700', 'border-green-700', 'border-b-4');
+            tabButtons[tab].classList.remove('text-gray-500', 'hover:text-green-600');
 
             // Show/hide content
             for (const key in tabContents) {

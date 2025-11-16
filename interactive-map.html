@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UT Microfarm Interactive Map</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* SVG Map Styling */
+        .farm-svg {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+        }
+        .farm-bg { fill: #f0fdf4; } /* Light green grass */
+        .farm-shed { fill: #78350f; } /* Brown shed */
+        .farm-plot { fill: #a3e635; stroke: #65a30d; stroke-width: 2px; } /* Bright green plots */
+        .farm-orchard-tree { fill: #22c55e; } /* Green trees */
+        .farm-fence { fill: none; stroke: #737373; stroke-width: 2px; }
+        .farm-tennis { fill: #dbeafe; } /* Blue tennis courts */
+
+        /* Hotspot Styling */
+        .hotspot {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background-color: #ef4444; /* Red */
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: pulse 2s infinite;
+        }
+        .hotspot:hover {
+            transform: scale(1.2);
+            animation-play-state: paused;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Modal Styling */
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .modal.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+        .modal-content.hidden {
+            transform: translateY(20px);
+        }
+        .modal-content.visible {
+            transform: translateY(0);
+        }
+        .modal.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-center text-gray-800">
+                UT Microfarm Interactive Map
+            </h1>
+        </div>
+
+        <!-- Tab Controls -->
+        <div class="flex border-b border-gray-200">
+            <button id="tab-how-to" class="flex-1 py-4 px-6 text-center font-semibold text-green-700 border-b-4 border-green-700 focus:outline-none" onclick="switchTab('how-to')">
+                How to Get Here
+            </button>
+            <button id="tab-explore" class="flex-1 py-4 px-6 text-center font-semibold text-gray-500 hover:text-green-600 focus:outline-none" onclick="switchTab('explore')">
+                Explore the Farm
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="p-4 md:p-8">
+            <!-- "How to Get Here" Tab Content -->
+            <div id="content-how-to">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Directions & Parking</h2>
+                <p class="text-gray-600 mb-6">Follow the path to find the farm, located behind the UT Whitaker Tennis Courts. Leralynn St. offers free parking for all visitors.</p>
+                <div class="w-full overflow-hidden rounded-lg border border-gray-200">
+                    <!-- 
+                      NOTE: Replace this 'src' with the URL of the image 
+                      after you upload it to your WordPress media library.
+                    -->
+                    <img src="microfarm-map-with-labels.png" alt="Directions to UT Microfarm" class="w-full h-auto"
+                         onerror="this.src='https_placehold.co/800x600/e2e8f0/94a3b8?text=Directions+Map+Loading...'">
+                </div>
+            </div>
+
+            <!-- "Explore the Farm" Tab Content -->
+            <div id="content-explore" class="hidden">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Farm Layout</h2>
+                <p class="text-gray-600 mb-6">Click on the pulsing red dots to learn more about each area of the farm.</p>
+                
+                <!-- 
+                  This is the core of the interactive map.
+                  The SVG is drawn below, and the hotspots (divs) are
+                  positioned absolutely on top of it.
+                -->
+                <div class="relative w-full max-w-3xl mx-auto aspect-video rounded-lg overflow-hidden border border-gray-200">
+                    <!-- 
+                      This is the inline, illustrated SVG map.
+                      It's drawn to look like your 'ut microfarm only.jpg' file.
+                    -->
+                    <svg class="farm-svg" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid meet">
+                        <!-- Background -->
+                        <rect class="farm-bg" width="800" height="450" />
+                        
+                        <!-- Tennis Courts (for reference) -->
+                        <rect class="farm-tennis" x="0" y="0" width="800" height="50" />
+                        <rect class="farm-tennis" x="0" y="380" width="100" height="70" />
+                        
+                        <!-- Farm Fence -->
+                        <path class="farm-fence" d="M 120 420 L 120 180 Q 120 80, 220 80 L 780 80 L 780 420 Z" />
+                        
+                        <!-- Main Shed -->
+                        <path class="farm-shed" d="M 250 200 L 300 170 L 350 200 L 350 260 L 250 260 Z" />
+                        
+                        <!-- Large Plots -->
+                        <rect class="farm-plot" x="400" y="100" width="350" height="100" />
+                        <rect class="farm-plot" x="400" y="220" width="350" height="100" />
+                        
+                        <!-- Raised Beds -->
+                        <rect class="farm-plot" x="150" y="200" width="50" height="30" />
+                        <rect class="farm-plot" x="150" y="240" width="50" height="30" />
+                        <rect class="farm-plot" x="150" y="280" width="50" height="30" />
+                        <rect class="farm-plot" x="150" y="320" width="50" height="30" />
+                        
+                        <rect class="farm-plot" x="220" y="280" width="50" height="30" />
+                        <rect class="farm-plot" x="220" y="320" width="50" height="30" />
+
+                        <!-- Orchard -->
+                        <circle class="farm-orchard-tree" cx="300" cy="350" r="8" />
+                        <circle class="farm-orchard-tree" cx="330" cy="370" r="8" />
+                        <circle class="farm-orchard-tree" cx="360" cy="350" r="8" />
+                        <circle class="farm-orchard-tree" cx="390" cy="370" r="8" />
+                        <circle class="farm-orchard-tree" cx="420" cy="350" r="8" />
+                    </svg>
+                    
+                    <!-- 
+                      Hotspots
+                      These are positioned with percentages (top, left)
+                      to stay in place on the responsive SVG.
+                    -->
+                    <div class="hotspot" style="top: 45%; left: 37%;" onclick="openModal('shed')"></div>
+                    <div class="hotspot" style="top: 65%; left: 25%;" onclick="openModal('beds')"></div>
+                    <div class="hotspot" style="top: 30%; left: 70%;" onclick="openModal('plot1')"></div>
+                    <div class="hotspot" style="top: 80%; left: 50%;" onclick="openModal('orchard')"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+      Modal Window
+      This is hidden by default and shown with JavaScript.
+    -->
+    <div id="modal" class="modal hidden fixed inset-0 z-50 flex items-center justify-center p-4" onclick="closeModal()">
+        <!-- Modal Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-75"></div>
+        
+        <!-- Modal Content -->
+        <div id="modal-content" class="modal-content hidden bg-white rounded-lg shadow-xl overflow-hidden max-w-lg w-full relative z-10" onclick="event.stopPropagation()">
+            <!-- Close Button -->
+            <button class="absolute top-3 right-3 text-gray-400 hover:text-gray-800" onclick="closeModal()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            
+            <!-- Dynamic Content -->
+            <img id="modal-image" src="" alt="Location image" class="w-full h-48 object-cover">
+            <div class="p-6">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800 mb-3"></h3>
+                <p id="modal-description" class="text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+      JavaScript for Tabs and Modal
+    -->
+    <script>
+        // Data for the modal popups
+        const modalData = {
+            'shed': {
+                title: 'Main Shed & Tool Storage',
+                description: 'This is where we keep all our tools, seeds, and equipment. It\'s also the main gathering point for new volunteers before a workday begins. Fun fact: The roof is designed to collect rainwater!',
+                imageUrl: 'https://placehold.co/600x400/a3e635/4d7c0f?text=Ground+Photo+of+Shed'
+            },
+            'beds': {
+                title: 'Raised Garden Beds',
+                description: 'These beds are used for seasonal vegetable production and student experiments. Right now, we are growing tomatoes, peppers, and various herbs. These are easier to work with as they don\'t require bending over as much.',
+                imageUrl: 'https://placehold.co/600x400/a3e635/4d7c0f?text=Photo+of+Raised+Beds'
+            },
+            'plot1': {
+                title: 'Large Crop Plot',
+                description: 'This is one of our main in-ground plots. We rotate crops here seasonally, including corn, squash, and beans, to keep the soil healthy. This plot is essential for our outpost produce tracking.',
+                imageUrl: 'https://placehold.co/600x400/a3e635/4d7c0f?text=Photo+of+Large+Plot'
+            },
+            'orchard': {
+                title: 'Fruit Orchard',
+                description: 'This area contains a variety of young fruit trees, including fig, pear, and citrus. We are experimenting to see which varieties grow best in the Austin climate. Fun fact: These trees are watered using a drip irrigation system.',
+                imageUrl: 'https://placehold.co/600x400/a3e635/4d7c0f?text=Photo+of+Orchard'
+            }
+        };
+
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalImage = document.getElementById('modal-image');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDescription = document.getElementById('modal-description');
+
+        // Tab switching logic
+        const tabButtons = {
+            'how-to': document.getElementById('tab-how-to'),
+            'explore': document.getElementById('tab-explore')
+        };
+        const tabContents = {
+            'how-to': document.getElementById('content-how-to'),
+            'explore': document.getElementById('content-explore')
+        };
+
+        function switchTab(tab) {
+            // Update button styles
+            for (const key in tabButtons) {
+                tabButtons[key].classList.remove('text-green-700', 'border-green-700');
+                tabButtons[key].classList.add('text-gray-500', 'hover:text-green-600');
+            }
+            tabButtons[tab].classList.add('text-green-700', 'border-green-700');
+            tabButtons[tab].classList.remove('text-gray-500');
+
+            // Show/hide content
+            for (const key in tabContents) {
+                tabContents[key].classList.add('hidden');
+            }
+            tabContents[tab].classList.remove('hidden');
+        }
+
+        // Modal logic
+        function openModal(id) {
+            const data = modalData[id];
+            if (data) {
+                modalImage.src = data.imageUrl;
+                modalImage.alt = data.title;
+                modalTitle.textContent = data.title;
+                modalDescription.textContent = data.description;
+                
+                modal.classList.remove('hidden');
+                modal.classList.add('visible');
+                modalContent.classList.remove('hidden');
+                modalContent.classList.add('visible');
+            }
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+            modal.classList.remove('visible');
+            modalContent.classList.add('hidden');
+            modalContent.classList.remove('visible');
+        }
+    </script>
+
+</body>
+</html>
